@@ -6,3 +6,4 @@
 - Directives: `required`, `optional`, `int`, `float`, `bool`, `url`, `port`, `choices=`.
 - pre-commit hook.
 - New types `uuid` and `email` (also detected by `generate`).
+- Configuration via `[tool.envguard]` in pyproject.toml (`env`, `example`, `strict`, `ignore`), `--config` and `--ignore` options.

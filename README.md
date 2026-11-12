@@ -7,7 +7,7 @@ Catch broken `.env` files before they break your app.
 command line tool in CI, in a pre-commit hook or by hand.
 
 **Who it's for:** anyone who ships an app configured with environment variables and has lost time to a
-missing key or a `DEBUG=maybe`. **Built with:** pure Python 3.10+, no dependencies.
+missing key or a `DEBUG=maybe`. **Built with:** pure Python 3.10+. No dependencies on Python 3.11+ (3.10 installs `tomli` to read pyproject.toml).
 
 ## Install
 
@@ -50,11 +50,26 @@ FAILED: 6 errors, 1 warning
 
 Exit codes: `0` ok, `1` problems found, `2` usage error (for example a file is missing).
 
+## Configuration
+
+Put defaults in `pyproject.toml` so you don't repeat flags (command line options win over the file):
+
+```toml
+[tool.envguard]
+env = ".env.ci"          # env file to check (default: .env)
+example = ".env.example" # example file (default: .env.example)
+strict = true            # treat warnings as errors
+ignore = ["PATH", "HOME"] # variables allowed in the env file without being declared
+```
+
+Use `--config path/to/file.toml` to read a different file. Unknown options or wrong types are reported as
+errors (exit code 2), so typos don't silently do nothing.
+
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `envguard check` | Compare `.env` with `.env.example`. Options: `--env`, `--example`, `--strict` (warnings fail too), `--format json`, `--quiet` |
+| `envguard check` | Compare `.env` with `.env.example`. Options: `--env`, `--example`, `--strict` (warnings fail too), `--ignore NAME` (repeatable), `--format json`, `--quiet`, `--config` |
 | `envguard generate` | Write a `.env.example` from a `.env`. Values are **never copied**; it guesses types (`int`, `bool`, `url`...) from them. Options: `--env`, `--output` (`-` for stdout), `--force` |
 
 ## Directives

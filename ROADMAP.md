@@ -11,7 +11,7 @@ Rough priority order. Each item should become a GitHub issue.
 - [ ] Custom validators via a small plugin interface
 
 ## Usability
-- [ ] Configuration in `pyproject.toml` (`[tool.envguard]`): default paths, strict mode, ignored variables
+- [x] Configuration in `pyproject.toml` (`[tool.envguard]`): default paths, strict mode, ignored variables
 - [ ] Check several env files in one run (`.env`, `.env.local`, `.env.test`)
 - [ ] `envguard diff` to compare two env files (for example staging and production) without printing values
 - [ ] `envguard check --fix` to append missing variables with blank values

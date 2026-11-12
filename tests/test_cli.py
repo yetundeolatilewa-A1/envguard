@@ -75,3 +75,48 @@ def test_subcommand_required():
     with pytest.raises(SystemExit) as exc:
         main([])
     assert exc.value.code == 2
+
+
+def test_config_supplies_paths_and_strict(project, capsys):
+    (project / "ci.env").write_text("PORT=80\nNAME=x\nEXTRA=1\n")
+    (project / "pyproject.toml").write_text('[tool.envguard]\nenv = "ci.env"\nstrict = true\n')
+    assert main(["check"]) == 1
+    out = capsys.readouterr().out
+    assert "ci.env" in out and "ENV004" in out
+
+
+def test_command_line_beats_config(project, capsys):
+    (project / ".env").write_text("PORT=80\nNAME=x\n")
+    (project / "ci.env").write_text("PORT=abc\n")
+    (project / "pyproject.toml").write_text('[tool.envguard]\nenv = "ci.env"\n')
+    assert main(["check"]) == 1
+    assert main(["check", "--env", ".env"]) == 0
+
+
+def test_ignore_from_config_and_flag(project, capsys):
+    (project / ".env").write_text("PORT=80\nNAME=x\nA=1\nB=2\n")
+    (project / "pyproject.toml").write_text('[tool.envguard]\nignore = ["A"]\nstrict = true\n')
+    assert main(["check"]) == 1
+    assert "B: not declared" in capsys.readouterr().out
+    assert main(["check", "--ignore", "B"]) == 0
+
+
+def test_explicit_config_file(project, capsys):
+    (project / ".env").write_text("PORT=80\nNAME=x\nEXTRA=1\n")
+    (project / "strict.toml").write_text("[tool.envguard]\nstrict = true\n")
+    assert main(["check"]) == 0
+    assert main(["check", "--config", "strict.toml"]) == 1
+
+
+def test_bad_config_is_exit_2(project, capsys):
+    (project / ".env").write_text("PORT=80\nNAME=x\n")
+    (project / "pyproject.toml").write_text("[tool.envguard]\nnope = 1\n")
+    assert main(["check"]) == 2
+    assert "unknown option" in capsys.readouterr().err
+
+
+def test_generate_uses_config_paths(project, capsys):
+    (project / "app.env").write_text("A=1\n")
+    (project / "pyproject.toml").write_text('[tool.envguard]\nenv = "app.env"\nexample = "app.example"\n')
+    assert main(["generate"]) == 0
+    assert (project / "app.example").exists()

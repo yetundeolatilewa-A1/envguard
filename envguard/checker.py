@@ -59,7 +59,10 @@ def check(
     strict: bool = False,
     example_name: str = ".env.example",
     env_name: str = ".env",
+    ignore=(),
 ) -> Report:
+    """``ignore`` lists variable names that may exist in the env file without being declared."""
+    ignored = set(ignore)
     findings = []
 
     def add(level, code, file, message, line=None, key=None):
@@ -115,7 +118,7 @@ def check(
             add("error", "ENV003", env_name, problem, actual.line, key)
 
     for key, entry in env_map.items():
-        if key not in example_map:
+        if key not in example_map and key not in ignored:
             add("warning", "ENV004", env_name, f"not declared in {example_name}", entry.line, key)
 
     return Report(findings)

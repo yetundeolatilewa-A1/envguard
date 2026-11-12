@@ -89,3 +89,8 @@ def test_file_names_appear_in_findings():
     report = check("A=\n", "", example_name="ex.txt", env_name="real.env")
     assert report.findings[0].file == "real.env"
     assert "ex.txt:1" in report.findings[0].message
+
+
+def test_ignore_silences_undeclared_warning():
+    report = check(EXAMPLE, GOOD + "EXTRA=1\nOTHER=2\n", ignore=["EXTRA"])
+    assert codes(report) == [("ENV004", "OTHER")]
