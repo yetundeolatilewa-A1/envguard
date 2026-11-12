@@ -1,0 +1,7 @@
+- id: envguard
+  name: envguard
+  description: Check an env file against .env.example
+  entry: envguard check
+  language: python
+  pass_filenames: false
+  always_run: true
