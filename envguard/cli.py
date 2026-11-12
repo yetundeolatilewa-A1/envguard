@@ -11,6 +11,7 @@ from .checker import check
 from .config import ConfigError, load_config
 from .generate import generate
 from .report import format_json, format_text
+from .scan import find_usages, scan
 
 
 class CliError(Exception):
@@ -59,6 +60,17 @@ def build_parser() -> argparse.ArgumentParser:
     gen_p.add_argument("--env", help="env file to read (default: .env)")
     gen_p.add_argument("--output", help="output file, or - for stdout (default: .env.example)")
     gen_p.add_argument("--force", action="store_true", help="overwrite the output file if it exists")
+
+    scan_p = sub.add_parser(
+        "scan", parents=[common], help="find env variables read in your code and compare with the example file"
+    )
+    scan_p.add_argument("paths", nargs="*", default=["."], help="files or folders to scan (default: .)")
+    scan_p.add_argument("--example", help="example file (default: .env.example)")
+    scan_p.add_argument("--ignore", action="append", default=[], metavar="NAME", help="variable to skip (repeatable)")
+    scan_p.add_argument("--unused", action="store_true", help="also report variables declared but never read")
+    scan_p.add_argument("--strict", action="store_true", default=None, help="treat warnings as errors")
+    scan_p.add_argument("--format", choices=["text", "json"], default="text")
+    scan_p.add_argument("--quiet", action="store_true", help="only print the summary line")
     return parser
 
 
@@ -99,10 +111,38 @@ def _run_generate(args) -> int:
     return 0
 
 
+def _run_scan(args) -> int:
+    cfg = _config(args)
+    example = args.example or cfg.get("example", ".env.example")
+    strict = args.strict if args.strict is not None else cfg.get("strict", False)
+    try:
+        usages, scanned = find_usages(args.paths)
+    except FileNotFoundError as exc:
+        raise CliError(f"path not found: {exc}") from None
+    if scanned == 0:
+        print("envguard: warning: no source files found to scan", file=sys.stderr)
+    report = scan(
+        _read(example),
+        usages,
+        unused=args.unused,
+        ignore=[*cfg.get("ignore", []), *args.ignore],
+        strict=strict,
+        example_name=example,
+    )
+    if args.format == "json":
+        print(format_json(report))
+    else:
+        print(format_text(report, quiet=args.quiet))
+    return 0 if report.ok else 1
+
+
+COMMANDS = {"check": _run_check, "generate": _run_generate, "scan": _run_scan}
+
+
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        return _run_check(args) if args.command == "check" else _run_generate(args)
+        return COMMANDS[args.command](args)
     except CliError as exc:
         print(f"envguard: error: {exc}", file=sys.stderr)
         return 2
