@@ -7,7 +7,7 @@ Catch broken `.env` files before they break your app.
 command line tool in CI, in a pre-commit hook or by hand.
 
 **Who it's for:** anyone who ships an app configured with environment variables and has lost time to a
-missing key or a `DEBUG=maybe`. **Built with:** pure Python 3.9+, no dependencies.
+missing key or a `DEBUG=maybe`. **Built with:** pure Python 3.10+, no dependencies.
 
 ## Install
 
