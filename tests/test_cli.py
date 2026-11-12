@@ -120,3 +120,39 @@ def test_generate_uses_config_paths(project, capsys):
     (project / "pyproject.toml").write_text('[tool.envguard]\nenv = "app.env"\nexample = "app.example"\n')
     assert main(["generate"]) == 0
     assert (project / "app.example").exists()
+
+
+def test_scan_finds_undeclared_variables(project, capsys):
+    (project / "src").mkdir()
+    (project / "src" / "app.py").write_text('import os\nos.getenv("PORT")\nos.getenv("SURPRISE")\n')
+    assert main(["scan", "src"]) == 0
+    out = capsys.readouterr().out
+    assert "ENV101" in out and "SURPRISE" in out and "src/app.py:3" in out
+    assert main(["scan", "src", "--strict"]) == 1
+
+
+def test_scan_unused_and_json(project, capsys):
+    (project / "app.py").write_text('import os\nos.getenv("PORT")\n')
+    assert main(["scan", "app.py", "--unused", "--format", "json"]) == 0
+    data = json.loads(capsys.readouterr().out)
+    assert [(f["code"], f["key"]) for f in data["findings"]] == [("ENV102", "NAME")]
+
+
+def test_scan_uses_config_ignore(project, capsys):
+    (project / "app.py").write_text('import os\nos.getenv("SURPRISE")\n')
+    (project / "pyproject.toml").write_text('[tool.envguard]\nignore = ["SURPRISE"]\n')
+    assert main(["scan", "app.py"]) == 0
+    assert capsys.readouterr().out.strip() == "OK"
+
+
+def test_scan_missing_path_and_example(project, capsys):
+    assert main(["scan", "nowhere"]) == 2
+    assert "path not found" in capsys.readouterr().err
+    (project / ".env.example").unlink()
+    (project / "app.py").write_text("x = 1\n")
+    assert main(["scan", "app.py"]) == 2
+
+
+def test_scan_warns_when_nothing_to_scan(project, capsys):
+    assert main(["scan"]) == 0
+    assert "no source files" in capsys.readouterr().err

@@ -3,12 +3,13 @@
 Rough priority order. Each item should become a GitHub issue.
 
 ## Checks
-- [ ] Find unused variables: declared in the example but never read in the code (`os.environ`, `os.getenv`, `process.env`)
-- [ ] Find undeclared variables: read in the code but missing from the example
+- [x] Find unused variables: declared in the example but never read in the code (`envguard scan --unused`)
+- [x] Find undeclared variables: read in the code but missing from the example (`envguard scan`)
 - [ ] Warn when a secret-looking value (keys, tokens, private keys) appears in a file that is tracked by git
 - [x] More types: `uuid`, `email`
 - [ ] Even more types: `path`, `duration`, `json`, `list`, and a `min=`/`max=` range for numbers
 - [ ] Custom validators via a small plugin interface
+- [ ] Scan more languages and patterns (Go, Ruby, PHP, Docker Compose, `${VAR}` in config files)
 
 ## Usability
 - [x] Configuration in `pyproject.toml` (`[tool.envguard]`): default paths, strict mode, ignored variables

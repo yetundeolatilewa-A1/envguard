@@ -70,6 +70,7 @@ errors (exit code 2), so typos don't silently do nothing.
 | Command | What it does |
 |---|---|
 | `envguard check` | Compare `.env` with `.env.example`. Options: `--env`, `--example`, `--strict` (warnings fail too), `--ignore NAME` (repeatable), `--format json`, `--quiet`, `--config` |
+| `envguard scan [PATHS]` | Find variables your code reads (`os.environ`, `os.getenv`, `process.env`, `import.meta.env`) that are missing from `.env.example`. Options: `--example`, `--ignore NAME`, `--unused` (also list declared variables the code never reads), `--strict`, `--format json`, `--quiet`, `--config` |
 | `envguard generate` | Write a `.env.example` from a `.env`. Values are **never copied**; it guesses types (`int`, `bool`, `url`...) from them. Options: `--env`, `--output` (`-` for stdout), `--force` |
 
 ## Directives
@@ -95,6 +96,18 @@ the same line: `DEBUG=false  # envguard: bool`. Combine several separated by spa
 | ENV005 | warning | Defined more than once (the last one wins) |
 | ENV006 | error | Unknown or conflicting directive in the example |
 | ENV007 | error | A line could not be parsed |
+| ENV101 | warning | `scan`: used in code but not declared in the example |
+| ENV102 | warning | `scan --unused`: declared in the example but never read in the code |
+
+The scan is static: it reads string literals such as `os.getenv("KEY")`. Names built at run time are not
+seen, variables read by frameworks or Docker Compose may show up as "unused", and common system
+variables (`PATH`, `HOME`, ...) are skipped. Use `--ignore` or `ignore = [...]` to skip others.
+
+```console
+$ envguard scan src --example .env.example
+warning ENV101  src/payments.py:12  STRIPE_WEBHOOK_SECRET: used in code but not declared in .env.example
+OK with 1 warning
+```
 
 Error messages never print your values, so secrets don't end up in CI logs.
 
