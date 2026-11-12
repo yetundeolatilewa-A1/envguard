@@ -16,6 +16,8 @@ def test_type_inference():
     assert infer("WORKERS", "4") == "int"
     assert infer("RATIO", "0.5") == "float"
     assert infer("DATABASE_URL", "postgres://u:p@h/db") == "url"
+    assert infer("REQUEST_ID", "123e4567-e89b-12d3-a456-426614174000") == "uuid"
+    assert infer("ADMIN_EMAIL", "admin@example.com") == "email"
     assert infer("NAME", "hello") is None
     assert infer("SENTRY_DSN", "") == "optional"
 

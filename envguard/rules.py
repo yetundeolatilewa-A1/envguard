@@ -6,10 +6,12 @@ import re
 from dataclasses import dataclass, field
 from urllib.parse import urlsplit
 
-TYPES = ("int", "float", "bool", "url", "port")
+TYPES = ("int", "float", "bool", "url", "port", "uuid", "email")
 _BOOLS = {"true", "false", "1", "0", "yes", "no", "on", "off"}
 _INT = re.compile(r"[+-]?\d+")
 _FLOAT = re.compile(r"[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?")
+_UUID = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
+_EMAIL = re.compile(r"[^@\s]+@[^@\s.]+(\.[^@\s.]+)+")
 
 
 @dataclass
@@ -70,4 +72,8 @@ def validate(value: str, rule: Rule):
         return "expected a URL like scheme://host"
     if kind == "port" and not (_INT.fullmatch(value) and 1 <= int(value) <= 65535):
         return "expected a port number (1-65535)"
+    if kind == "uuid" and not _UUID.fullmatch(value):
+        return "expected a UUID like 123e4567-e89b-12d3-a456-426614174000"
+    if kind == "email" and not _EMAIL.fullmatch(value):
+        return "expected an email address"
     return None

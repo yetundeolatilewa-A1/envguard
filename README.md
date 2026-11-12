@@ -66,7 +66,7 @@ the same line: `DEBUG=false  # envguard: bool`. Combine several separated by spa
 |---|---|
 | `required` | Must be present and non-empty (the default) |
 | `optional` | May be missing or empty; if set, it is still type-checked |
-| `int`, `float`, `bool`, `url`, `port` | Value must have this type |
+| `int`, `float`, `bool`, `url`, `port`, `uuid`, `email` | Value must have this type |
 | `choices=a\|b\|c` | Value must be one of these |
 
 ## Findings

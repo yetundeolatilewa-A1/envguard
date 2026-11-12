@@ -56,3 +56,31 @@ def test_choices_validator_lists_options_but_not_value():
 def test_messages_never_contain_the_value():
     for kind in ("int", "float", "bool", "url", "port"):
         assert "s3cr3t" not in validate("s3cr3t", rule(kind))
+
+
+@pytest.mark.parametrize(
+    "kind,good,bad",
+    [
+        (
+            "uuid",
+            ["123e4567-e89b-12d3-a456-426614174000", "123E4567-E89B-12D3-A456-426614174000"],
+            ["123e4567e89b12d3a456426614174000", "not-a-uuid", "123e4567-e89b-12d3-a456-42661417400", ""],
+        ),
+        (
+            "email",
+            ["a@b.co", "first.last+tag@sub.example.com"],
+            ["a@b", "a@@b.co", "a b@c.de", "@b.co", "a@b..co", "plainaddress"],
+        ),
+    ],
+)
+def test_uuid_and_email_validators(kind, good, bad):
+    r = rule(kind)
+    for value in good:
+        assert validate(value, r) is None, value
+    for value in bad:
+        assert validate(value, r), value
+
+
+def test_new_type_messages_never_contain_the_value():
+    for kind in ("uuid", "email"):
+        assert "s3cr3t" not in validate("s3cr3t", rule(kind))

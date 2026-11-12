@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 
 from .parser import parse
-from .rules import _valid_url
+from .rules import _EMAIL, _UUID, _valid_url
 
 _INT = re.compile(r"[+-]?\d+")
 _FLOAT = re.compile(r"[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?")
@@ -24,6 +24,10 @@ def infer(key: str, value: str):
         return "int"
     if _FLOAT.fullmatch(value):
         return "float"
+    if _UUID.fullmatch(value):
+        return "uuid"
+    if _EMAIL.fullmatch(value):
+        return "email"
     if "://" in value and _valid_url(value):
         return "url"
     return None
