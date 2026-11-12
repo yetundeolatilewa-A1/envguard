@@ -5,3 +5,4 @@
 - `envguard generate`: create a `.env.example` from a `.env` without copying values.
 - Directives: `required`, `optional`, `int`, `float`, `bool`, `url`, `port`, `choices=`.
 - pre-commit hook.
+- New types `uuid` and `email` (also detected by `generate`).

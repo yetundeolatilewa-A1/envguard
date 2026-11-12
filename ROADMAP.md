@@ -6,7 +6,8 @@ Rough priority order. Each item should become a GitHub issue.
 - [ ] Find unused variables: declared in the example but never read in the code (`os.environ`, `os.getenv`, `process.env`)
 - [ ] Find undeclared variables: read in the code but missing from the example
 - [ ] Warn when a secret-looking value (keys, tokens, private keys) appears in a file that is tracked by git
-- [ ] More types: `uuid`, `email`, `path`, `duration`, `json`, `list`, and a `min=`/`max=` range for numbers
+- [x] More types: `uuid`, `email`
+- [ ] Even more types: `path`, `duration`, `json`, `list`, and a `min=`/`max=` range for numbers
 - [ ] Custom validators via a small plugin interface
 
 ## Usability
